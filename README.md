@@ -7,6 +7,17 @@ This project contains implementations for sequence labeling using:
 
 ## 📁 File Structure
 
+## Preprocess
+
+### Preprocess Step
+
+Before training either model, we first preprocess the original `train` file to replace rare words with a special `#UNK#` token. This helps handle unseen words during decoding.
+```
+python preprocess_train.py
+```
+This script reads `train`, replaces words that occur once with `#UNK#`, and writes the result to `train.unk`. This file is used for both part 2 and part 4.
+
+
 
 ## ✅ Part 2: HMM + Viterbi
 
