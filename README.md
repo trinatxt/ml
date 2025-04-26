@@ -2,10 +2,14 @@
 
 This project contains implementations for sequence labeling using:
 
+- **Part 1**: Emission-based tagging (baseline)
 - **Part 2**: HMM + Viterbi decoding (generative baseline)
+- **Part 3**: 4th-best Viterbi decoding
 - **Part 4**: Structured Perceptron (discriminative model)
 
 ## 📁 File Structure
+
+. ├── preprocess_train.py ├── part1.py ├── p2_train_hmm.py ├── p2_viterbi.py ├── part3.py ├── p4_perceptron_train.py ├── p4_perceptron_decode.py ├── train ├── dev.in ├── dev.out ├── dev.p1.out ├── dev.p2.out ├── dev.p3.out ├── dev.p4.out └── README.md
 
 ## Preprocess
 
@@ -17,7 +21,24 @@ python preprocess_train.py
 ```
 This script reads `train`, replaces words that occur once with `#UNK#`, and writes the result to `train.unk`. This file is used for both part 2 and part 4.
 
+## ✅ Part 1: Emission-Based Tagging
 
+Train a simple emission model and tag the data:
+
+```
+python part1.py
+```
+This will:
+- Create a modified training set
+- Train the emission probabilities
+- Save output predictions for dev.in to dev.p1.out
+
+### 2. Evaluate p1
+
+```
+cd ../EvalScript
+python evalResult.py ../EN/dev.out ../EN/dev.p1.out
+```
 
 ## ✅ Part 2: HMM + Viterbi
 
@@ -45,6 +66,29 @@ This writes the output to `dev.p2.out`.
 ```
 cd ../EvalScript
 python evalResult.py ../EN/dev.out ../EN/dev.p2.out
+```
+
+## ✅ Part 3: 4th-Best Viterbi Tagging
+
+### 1. Preprocess and Train
+
+Use a modified Viterbi algorithm to find the 4th-best tag sequence for each sentence:
+
+```
+python part3.py
+```
+
+This will:
+- Replace rare words in the training data
+- Estimate emission and transition probabilities
+- Find the 4th-best tag sequence using Viterbi
+- Save predictions to dev.p3.out
+
+### 2. Evaluate p3
+
+```
+cd ../EvalScript
+python evalResult.py ../EN/dev.out ../EN/dev.p3.out
 ```
 
 ## ✅ Part 4
