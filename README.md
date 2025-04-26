@@ -1,4 +1,4 @@
-# Sequence Labeling Assignment — Part 2 & Part 4
+# Sequence Labeling Assignment
 
 This project contains implementations for sequence labeling using:
 
