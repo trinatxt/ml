@@ -1,16 +1,37 @@
 import json
 
-DEV_FILE = "dev.in"
-OUTPUT_FILE = "dev.p4.out"
+DEV_FILE = "dev.in"   # or "test.in" if testing
+OUTPUT_FILE = "dev.p4.out"  # or "v3.test.p4.out" if testing
 WEIGHTS_FILE = "perceptron_weights.json"
 START = "<s>"
+STOP = "</s>"
 
-def extract_features(word, tag, prev_tag):
-    return [
+# Full tag set manually defined
+TAG_SET = {
+    'B-NP', 'I-NP', 'B-VP', 'I-VP', 'B-ADJP', 'I-ADJP',
+    'B-ADVP', 'I-ADVP', 'B-PP', 'I-PP', 'O'
+}
+
+def extract_features(sentence, i, tag, prev_tag):
+    word = sentence[i]
+    prev_word = sentence[i-1] if i > 0 else START
+    next_word = sentence[i+1] if i < len(sentence)-1 else STOP
+
+    feats = [
         f"TAG:{tag}",
         f"TAG:{tag}_WORD:{word}",
         f"BIGRAM:{prev_tag}->{tag}",
+        f"TAG:{tag}_PREV_WORD:{prev_word}",
+        f"TAG:{tag}_NEXT_WORD:{next_word}"
     ]
+
+    if word[0].isupper():
+        feats.append(f"TAG:{tag}_CAPITALIZED")
+
+    if len(word) >= 3:
+        feats.append(f"TAG:{tag}_SUFFIX:{word[-3:]}")
+
+    return feats
 
 def viterbi_decode(sentence, weights, tag_set):
     n = len(sentence)
@@ -18,18 +39,17 @@ def viterbi_decode(sentence, weights, tag_set):
     bp = [{} for _ in range(n)]
 
     for tag in tag_set:
-        feats = extract_features(sentence[0], tag, START)
-        v[0][tag] = sum(weights.get(feat, 0) for feat in feats)
+        feats = extract_features(sentence, 0, tag, START)
+        v[0][tag] = sum(weights.get(f, 0) for f in feats)
         bp[0][tag] = START
 
     for i in range(1, n):
-        word = sentence[i]
         for tag in tag_set:
             best_score = float("-inf")
             best_prev = None
             for prev_tag in v[i-1]:
-                feats = extract_features(word, tag, prev_tag)
-                score = v[i-1][prev_tag] + sum(weights.get(feat, 0) for feat in feats)
+                feats = extract_features(sentence, i, tag, prev_tag)
+                score = v[i-1][prev_tag] + sum(weights.get(f, 0) for f in feats)
                 if score > best_score:
                     best_score = score
                     best_prev = prev_tag
@@ -37,7 +57,7 @@ def viterbi_decode(sentence, weights, tag_set):
                 v[i][tag] = best_score
                 bp[i][tag] = best_prev
 
-    best_last_tag = max(v[-1], key=v[-1].get)
+    best_last_tag = max(v[n-1], key=v[n-1].get)
     tags = [best_last_tag]
     for i in range(n-1, 0, -1):
         tags.insert(0, bp[i][tags[0]])
@@ -46,13 +66,6 @@ def viterbi_decode(sentence, weights, tag_set):
 def main():
     with open(WEIGHTS_FILE, "r", encoding="utf-8") as f:
         weights = json.load(f)
-
-    # Infer the tag set from weights
-    tag_set = set()
-    for feat in weights:
-        if feat.startswith("TAG:") and "_WORD" not in feat:
-            tag = feat.split(":")[1]
-            tag_set.add(tag)
 
     with open(DEV_FILE, "r", encoding="utf-8") as f:
         sentences = []
@@ -70,7 +83,7 @@ def main():
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as fout:
         for sentence in sentences:
-            tags = viterbi_decode(sentence, weights, tag_set)
+            tags = viterbi_decode(sentence, weights, TAG_SET)
             for word, tag in zip(sentence, tags):
                 fout.write(f"{word} {tag}\n")
             fout.write("\n")
