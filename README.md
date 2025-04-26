@@ -7,9 +7,19 @@ This project contains implementations for sequence labeling using:
 - **Part 3**: 4th-best Viterbi decoding
 - **Part 4**: Structured Perceptron (discriminative model)
 
-## 📁 File Structure
+## 📁 File Descriptions
 
-. ├── preprocess_train.py ├── part1.py ├── p2_train_hmm.py ├── p2_viterbi.py ├── part3.py ├── p4_perceptron_train.py ├── p4_perceptron_decode.py ├── train ├── dev.in ├── dev.out ├── dev.p1.out ├── dev.p2.out ├── dev.p3.out ├── dev.p4.out └── README.md
+| **File** | **Description** |
+|----------|-----------------|
+| `part1.py` | Emission-based baseline tagging |
+| `p2_train_hmm.py` | Train HMM parameters (emission + transition) |
+| `p2_viterbi.py` | Viterbi decoding for HMM |
+| `part3.py` | 4th-best Viterbi decoding |
+| `p4_perceptron_train.py` | Train structured perceptron |
+| `p4_perceptron_decode.py` | Decode with perceptron + Viterbi |
+| `preprocess_train.py` | Preprocess training data for unknown words |
+| `dev.in`, `dev.out`, `train` | Data files |
+| `dev.p1.out`, `dev.p2.out`, `dev.p3.out`, `dev.p4.out` | Model outputs |
 
 ## Preprocess
 
