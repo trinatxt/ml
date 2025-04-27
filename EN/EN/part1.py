@@ -60,7 +60,7 @@ def estimate_emissions(sentences):
     known_words = set(word for tag in emission_counts for word in emission_counts[tag])
     return emission_probs, known_words, set(tag_counts.keys())
 
-# ===== Step 3: Tag Development Data =====
+# ===== Step 3: Read Development Data =====
 def read_unlabeled_data(filepath):
     """Read unlabeled data (words only)."""
     sentences = []
@@ -78,12 +78,15 @@ def read_unlabeled_data(filepath):
         sentences.append(current_sentence)
     return sentences
 
+# ===== Step 4: Predict Tags =====
 def predict_tags(sentence, emission_probs, known_words, possible_tags):
     """Predict tags using argmax_y e(x|y)."""
     tagged_sentence = []
     for word in sentence:
+        original_word = word  # Save original word for output
+        
         if word not in known_words:
-            word = "#UNK#"
+            word = "#UNK#"  # Replace for lookup
         
         # Find tag with highest emission probability
         best_tag = None
@@ -99,10 +102,10 @@ def predict_tags(sentence, emission_probs, known_words, possible_tags):
         if best_tag is None:
             best_tag = "O"
             
-        tagged_sentence.append((word, best_tag))
+        tagged_sentence.append((original_word, best_tag))  # Use original word here!
     return tagged_sentence
 
-# ===== Step 4: Write Predictions =====
+# ===== Step 5: Write Predictions =====
 def write_output(sentences, filepath):
     """Write predictions to file."""
     with open(filepath, 'w', encoding='utf-8') as f:
@@ -111,7 +114,7 @@ def write_output(sentences, filepath):
                 f.write(f"{word} {tag}\n")
             f.write("\n")
 
-# ===== Step 5: Evaluation (Precision/Recall/F1) =====
+# ===== Step 6: Evaluation (Optional) =====
 def extract_chunks(tag_sequence):
     """Convert tag sequence to chunks (start, end, type)."""
     chunks = []
@@ -126,7 +129,6 @@ def extract_chunks(tag_sequence):
             if current_chunk and current_chunk[2] == chunk_type:
                 current_chunk = (current_chunk[0], i+1, chunk_type)
             else:
-                # Handle O -> I-X transition (treat I- as B- in this case)
                 if current_chunk:
                     chunks.append(current_chunk)
                 current_chunk = (i, i+1, chunk_type)
@@ -143,10 +145,8 @@ def evaluate(gold_file, pred_file):
     gold_sentences = read_labeled_data(gold_file)
     pred_sentences = read_labeled_data(pred_file)
 
-    # Make sure we have same number of sentences
     if len(gold_sentences) != len(pred_sentences):
         print(f"Warning: Gold has {len(gold_sentences)} sentences but predictions have {len(pred_sentences)}")
-        # Use the smaller number
         min_sentences = min(len(gold_sentences), len(pred_sentences))
         gold_sentences = gold_sentences[:min_sentences]
         pred_sentences = pred_sentences[:min_sentences]
@@ -173,7 +173,7 @@ def evaluate(gold_file, pred_file):
 
 # ===== Main =====
 if __name__ == "__main__":
-    # File paths (update as needed)
+    # File paths
     TRAIN_FILE = "train"
     DEV_IN_FILE = "dev.in"
     DEV_OUT_FILE = "dev.out"
@@ -196,6 +196,7 @@ if __name__ == "__main__":
     # Step 4: Write predictions
     write_output(tagged_sentences, OUTPUT_FILE)
 
-    # Step 5: Evaluate
+    # Optional Step 5: Evaluate
+    # Uncomment below if you want to evaluate automatically
     # precision, recall, f1 = evaluate(DEV_OUT_FILE, OUTPUT_FILE)
     # print(f"Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1:.4f}")
