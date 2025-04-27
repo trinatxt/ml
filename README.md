@@ -19,7 +19,7 @@ This project contains implementations for sequence labeling using:
 | `p4_perceptron_decode.py` | Decode with perceptron + Viterbi |
 | `preprocess_train.py` | Preprocess training data for unknown words |
 | `dev.in`, `dev.out`, `train` | Data files |
-| `dev.p1.out`, `dev.p2.out`, `dev.p3.out`, `dev.p4.out`, `test.p4.out` | Model outputs |
+| `dev.p1.out`, `dev.p2.out`, `dev.p3.out`, `dev.p4.out`, `test.p4.out` | Model output files |
 | `perceptron_weights.json` | Weights for Part 4 |
 
 ## Preprocess
